@@ -46,14 +46,15 @@ body {
   height: 40px;
   border: 2px solid red;
   border-radius: 100%;
+  background: #000;
 }
 
 #counter {
-  color: wheat;
+  color: #f5deb3;
 }
 
 #canvas {
-  background: #000;
+  background: #f5deb3;
 }
 
 #result {

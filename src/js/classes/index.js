@@ -46,7 +46,17 @@ class Sprite {
 
 
 class Fighter extends Sprite {
-	constructor({ position, velocity, offset = { x: 0, y: 0 }, imageSrc, scale = 1, frames = 1, sprites, attackBox = { offset: {}, width: undefined, height: undefined } }) {
+	constructor({
+		position,
+		velocity,
+		offset = { x: 0, y: 0 },
+		imageSrc, scale = 1,
+		frames = 1,
+		sprites,
+		attackBox = { offset: {}, width: undefined, height: undefined },
+		health,
+		damage
+	}) {
 		super({
 			position,
 			imageSrc,
@@ -69,7 +79,8 @@ class Fighter extends Sprite {
 			height: attackBox.height,
 		}
 		this.isAttacking = false
-		this.health = 100
+		this.healthMax = health
+		this.healthCurrent = health
 		this.bow = false
 		this.frameIndexCurrent = 0
 		this.frameElapsed = 0
@@ -77,6 +88,8 @@ class Fighter extends Sprite {
 		this.SetImageSprites(sprites)
 		this.flip = false
 		this.death = false
+		this.damage = damage
+		this.currentDamage = 0
 	}
 	addImageToSprites() {
 		for (const sprite in this.sprites) {
@@ -93,9 +106,10 @@ class Fighter extends Sprite {
 	}
 	update() {
 		this.draw()
-		if(!this.death) {
+		if (!this.death) {
 			this.animateFrames()
 		}
+		this.randomDamage()
 		// this.handleBow()
 		this.position.x += this.velocity.x
 		this.position.y += this.velocity.y
@@ -119,12 +133,8 @@ class Fighter extends Sprite {
 			this.isAttacking = false
 		}, 400)
 	}
-	handleBow() {
-		if (this.bow) {
-			this.height = 100
-		} else {
-			this.height = 150
-		}
+	randomDamage() {
+		this.currentDamage = Math.random() * (this.damage.max - this.damage.min) + this.damage.min;
 	}
 	switchSprite(sprite) {
 		// overriding all other animations with the attack animation
@@ -137,7 +147,7 @@ class Fighter extends Sprite {
 			return
 
 		if (this.image === this.sprites.death.image) {
-			if(this.frameIndexCurrent === this.sprites.death.frames -1) {
+			if (this.frameIndexCurrent === this.sprites.death.frames - 1) {
 				this.death = true
 			}
 			return
@@ -200,12 +210,21 @@ class Fighter extends Sprite {
 	handleFlip() {
 		// this.image.
 	}
-	takeHit() {
-		this.health -= 10
-		if(this.health <=0) {
+	takeHit(damage) {
+		console.log(damage);
+		if (this.healthCurrent <= 0) {
+			this.healthCurrent = 0
 			this.switchSprite('death')
 		} else {
+			this.healthCurrent -= damage
 			this.switchSprite('takeHit')
+		}
+	}
+	calculationHealth() {
+		if (this.healthCurrent * 100 / this.healthMax <= 0) {
+			return '0%'
+		} else {
+			return (this.healthCurrent * 100 / this.healthMax) + '%'
 		}
 	}
 }

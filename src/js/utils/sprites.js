@@ -94,7 +94,7 @@ images = {
 		},
 		takeHit: {
 			imageSrc: 'https://res.cloudinary.com/vth20/image/upload/v1674618036/game/flip-hero-1/s7iw8ay27d9chsjpyje7.png',
-			frames: 6
+			frames: 4
 		},
 
 	},
@@ -163,22 +163,22 @@ attackBoxPosition = {
 		width: 150,
 		height: 50
 	},
-	statHeros: {
-		ninja: {
-			health: 530,
-			damage: {
-				min: 20,
-				max: 38
-			}
-		},
-		hei: {
-			health: 678,
-			damage: {
-				min: 12,
-				max: 34
-			}
+}
+statHeros = {
+	ninja: {
+		health: 530,
+		damage: {
+			min: 20,
+			max: 42
+		}
+	},
+	hei: {
+		health: 678,
+		damage: {
+			min: 12,
+			max: 34
 		}
 	}
 }
 
-export { images, attackBoxPosition }
+export { images, attackBoxPosition, statHeros }

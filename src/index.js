@@ -1,17 +1,6 @@
 import { Sprite, Fighter } from './js/classes'
-import { images, imageCurrent, attackBoxPosition } from './js/utils';
+import { images, imageCurrent, attackBoxPosition, statHeros, resultBanner, playerHealth, enemyHealth, counter, } from './js/utils';
 // import { decreaseTimer } from
-console.log(Fighter);
-const $ = document.querySelector.bind(document)
-const canvas = $("#canvas")
-const c = canvas.getContext("2d")
-const playerHealth = $("#player_health")
-const enemyHealth = $("#enemy_health")
-const counter = $("#counter")
-const resultBanner = $("#text_result")
-
-canvas.width = 1024
-canvas.height = 576
 
 const background = new Sprite({
 	position: { x: 0, y: 0 },
@@ -32,7 +21,9 @@ const player = new Fighter({
 	scale: 2.5,
 	offset: { x: 215, y: 155 },
 	sprites: imageCurrent.player,
-	attackBox: attackBoxPosition.ninja
+	attackBox: attackBoxPosition.ninja,
+	health: statHeros.ninja.health,
+	damage: statHeros.ninja.damage
 })
 const enemy = new Fighter({
 	position: { x: 400, y: 100 },
@@ -42,14 +33,15 @@ const enemy = new Fighter({
 	scale: 2.5,
 	offset: { x: 215, y: 169 },
 	sprites: imageCurrent.enemy,
-	attackBox: attackBoxPosition.hei
+	attackBox: attackBoxPosition.hei,
+	health: statHeros.hei.health,
+	damage: statHeros.hei.damage
 })
 
 let time = 60
 let timerID = 0
 function determineWinner(player, enemy) {
 	clearTimeout(timerID)
-
 	resultBanner.style.display = 'block'
 	if (player.health === enemy.health) {
 		resultBanner.innerHTML = 'Tie'
@@ -76,8 +68,6 @@ function decreaseTimer() {
 	}
 }
 decreaseTimer()
-
-c.fillRect(0, 0, canvas.width, canvas.height)
 
 const key = {
 	'a': {
@@ -108,7 +98,6 @@ const key = {
 
 function animate() {
 	window.requestAnimationFrame(animate)
-	c.clearRect(0, 0, canvas.width, canvas.height)
 	background.update()
 	shop.update()
 	player.update()
@@ -135,7 +124,7 @@ function animate() {
 		player.switchSprite('idle')
 	}
 
-	if(player.velocity.y < 0) {
+	if (player.velocity.y < 0) {
 		player.switchSprite('jump')
 	} else if (player.velocity.y > 0) {
 		player.switchSprite('fall')
@@ -163,26 +152,21 @@ function animate() {
 		enemy.switchSprite('fall')
 	}
 
-	//abc
-	if(enemy.position.x > player.position.x) {
-
-	}
-
 	// detect for collision
 	if (rectangularCollision({ rectangle_1: player, rectangle_2: enemy }) && player.isAttacking && player.frameIndexCurrent === 4) {
 		player.isAttacking = false
-		enemy.takeHit()
-		enemyHealth.style.width = enemy.health + '%'
+		enemy.takeHit(player.currentDamage)
+		enemyHealth.style.width = enemy.calculationHealth()
 	}
 
-	if(player.isAttacking && player.frameIndexCurrent === 4) {
+	if (player.isAttacking && player.frameIndexCurrent === 4) {
 		player.isAttacking = false
 	}
 
 	if (rectangularCollision({ rectangle_1: enemy, rectangle_2: player }) && enemy.isAttacking && enemy.frameIndexCurrent === 2) {
 		enemy.isAttacking = false
-		player.takeHit()
-		playerHealth.style.width = player.health + '%'
+		player.takeHit(enemy.currentDamage)
+		playerHealth.style.width = player.calculationHealth()
 	}
 
 	if (enemy.isAttacking && enemy.frameIndexCurrent === 4) {
@@ -190,34 +174,35 @@ function animate() {
 	}
 
 	// end game base on health
-	if (enemy.health <= 0 || player.health <= 0) { determineWinner(player, enemy) }
+	if (enemy.healthCurrent <= 0 || player.healthCurrent <= 0) {
+		determineWinner(player, enemy)
+	}
 
-	// swith images
+	// switch flip images
 	if (player.position.x > enemy.position.x && !player.flip) {
 		player.flip = true
 		enemy.flip = false
-		if(!player.death) {
+		if (!player.death) {
 			player.SetImageSprites(images.ninja_flip)
 			player.setAttackBox(attackBoxPosition.ninja_flip.offset)
 		}
-		if(!enemy.death) {
+		if (!enemy.death) {
 			enemy.SetImageSprites(images.hei)
 			enemy.setAttackBox(attackBoxPosition.hei.offset)
 		}
 	} else if (player.position.x < enemy.position.x && !enemy.flip) {
 		player.flip = false
 		enemy.flip = true
-		if(!player.death) {
+		if (!player.death) {
 			player.SetImageSprites(images.ninja)
 			player.setAttackBox(attackBoxPosition.ninja.offset)
 		}
-		if(!enemy.death) {
+		if (!enemy.death) {
 			enemy.SetImageSprites(images.hei_flip)
 			enemy.setAttackBox(attackBoxPosition.hei_flip.offset)
 		}
 	}
 }
-
 animate()
 
 window.addEventListener('keydown', handleEventKeydown)
@@ -225,7 +210,7 @@ window.addEventListener('keyup', handleEventKeyup)
 
 function handleEventKeydown(e) {
 	// control player
-	if(!player.death) {
+	if (!player.death) {
 		switch (e.key) {
 			case 'd':
 				key.d.pressed = true
@@ -250,7 +235,7 @@ function handleEventKeydown(e) {
 	}
 
 	// control enemy
-	if(!enemy.death) {
+	if (!enemy.death) {
 		switch (e.key) {
 			case 'ArrowRight':
 				key.ArrowRight.pressed = true

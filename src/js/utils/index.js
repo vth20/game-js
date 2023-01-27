@@ -1,3 +1,5 @@
+export { images, attackBoxPosition } from './sprites'
+export { switchFlipImage, imageCurrent } from './switchFlipImage'
 export { decreaseTimer, determineWinner } from './timer'
 export { c, resultBanner, playerHealth, enemyHealth } from './elements'
 export { handleEventKeydown, handleEventKeyup, key } from './handleControl'

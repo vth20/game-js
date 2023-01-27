@@ -168,15 +168,15 @@ statHeros = {
 	ninja: {
 		health: 530,
 		damage: {
-			min: 20,
-			max: 42
+			min: 40,
+			max: 60
 		}
 	},
 	hei: {
 		health: 678,
 		damage: {
-			min: 12,
-			max: 34
+			min: 34,
+			max: 52
 		}
 	}
 }

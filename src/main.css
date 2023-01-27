@@ -1,0 +1,64 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Press Start 2P', cursive;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#container {
+  position: absolute;
+  margin-top: 5px;
+  display: flex;
+  width: 1024px;
+  justify-content: center;
+  align-items: center;
+}
+
+.health {
+  width: 400px;
+  height: 35px;
+  border: 5px solid #F2E6D8;
+  background: #D9A648;
+}
+
+.health_column {
+  display: block;
+  background: #F2133C;
+  width: 100%;
+  height: 100%;
+}
+
+#timer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width:90px;
+  height: 50px;
+  border: 5px solid #F2E6D8;
+  background: #000;
+}
+
+#counter {
+  color: #F2E6D8;
+}
+
+#canvas {
+  background: #F2E6D8;
+}
+
+#result {
+  position: absolute;
+  color: #fff;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  width: 1024px;
+  height: 576px;
+}
+
+#text_result {
+  display: none;
+}

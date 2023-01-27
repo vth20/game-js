@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GAME</title>
+    <link rel="stylesheet" href="./src/main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div style="position: relative">
+      <div id="container">
+        <div class="health">
+          <div id="player_health" class="health_column"></div>
+        </div>
+        <div id="timer">
+          <span id="counter">60s</span>
+        </div>
+        <div class="health" style="display: flex; justify-content: flex-end">
+          <div id="enemy_health" class="health_column"></div>
+        </div>
+      </div>
+      <div id="result">
+        <span id="text_result"></span>
+      </div>
+      <canvas id="canvas"> </canvas>
+    </div>
+    <script type="module" src="./src/index.js"></script>
+  </body>
+</html>

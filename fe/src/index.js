@@ -1,6 +1,11 @@
+import io from 'socket.io-client';
 import { Sprite, Fighter } from './js/classes'
 import { images, imageCurrent, attackBoxPosition, statHeros, resultBanner, playerHealth, enemyHealth, counter, } from './js/utils';
 // import { decreaseTimer } from
+import * as dotenv from 'dotenv'
+dotenv.config()
+console.log(process.env.BACKEND_URL);
+const socket = io(process.env.BACKEND_URL);
 
 const background = new Sprite({
 	position: { x: 0, y: 0 },
@@ -38,18 +43,18 @@ const enemy = new Fighter({
 	damage: statHeros.hei.damage
 })
 
-let time = 60
+let time = 5
 let timerID = 0
 function determineWinner(player, enemy) {
 	clearTimeout(timerID)
 	resultBanner.style.display = 'block'
-	if (player.health === enemy.health) {
+	if (player.calculationHealthPercent() === enemy.calculationHealthPercent()) {
 		resultBanner.innerHTML = 'Tie'
 	}
-	if (player.health > enemy.health) {
+	if (player.calculationHealthPercent() > enemy.calculationHealthPercent()) {
 		resultBanner.innerHTML = 'Player 1 win'
 	}
-	if (player.health < enemy.health) {
+	if (player.calculationHealthPercent() < enemy.calculationHealthPercent()) {
 		resultBanner.innerHTML = 'Player 2 win'
 	}
 	// if(player.health < 0) {
@@ -155,7 +160,7 @@ function animate() {
 	// detect for collision
 	if (rectangularCollision({ rectangle_1: player, rectangle_2: enemy }) && player.isAttacking && player.frameIndexCurrent === 4) {
 		player.isAttacking = false
-		enemy.takeHit(player.currentDamage)
+		enemy.takeHit(player.currentDamage, time)
 		enemyHealth.style.width = enemy.calculationHealth()
 	}
 
@@ -165,7 +170,7 @@ function animate() {
 
 	if (rectangularCollision({ rectangle_1: enemy, rectangle_2: player }) && enemy.isAttacking && enemy.frameIndexCurrent === 2) {
 		enemy.isAttacking = false
-		player.takeHit(enemy.currentDamage)
+		player.takeHit(enemy.currentDamage, time)
 		playerHealth.style.width = player.calculationHealth()
 	}
 
@@ -175,6 +180,7 @@ function animate() {
 
 	// end game base on health
 	if (enemy.healthCurrent <= 0 || player.healthCurrent <= 0) {
+
 		determineWinner(player, enemy)
 	}
 
@@ -302,3 +308,9 @@ function rectangularCollision({ rectangle_1, rectangle_2 }) {
 		rectangle_1.attackBox.position.y <= rectangle_2.position.y + rectangle_2.height && rectangle_1.isAttacking
 	)
 }
+let actors = undefined
+socket.emit('new-user');
+socket.on('user-info', (data) => {
+	actors = data
+	console.log(actors);
+})

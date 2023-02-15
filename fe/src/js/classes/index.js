@@ -210,9 +210,10 @@ class Fighter extends Sprite {
 	handleFlip() {
 		// this.image.
 	}
-	takeHit(damage) {
-		console.log(damage);
-		if (this.healthCurrent <= 0) {
+	takeHit(damage, time) {
+		if (time === 0) {
+			this.healthCurrent += 0
+		} else if (this.healthCurrent <= 0) {
 			this.healthCurrent = 0
 			this.switchSprite('death')
 		} else {
@@ -221,11 +222,14 @@ class Fighter extends Sprite {
 		}
 	}
 	calculationHealth() {
-		if (this.healthCurrent * 100 / this.healthMax <= 0) {
+		if (this.calculationHealthPercent() <= 0) {
 			return '0%'
 		} else {
-			return (this.healthCurrent * 100 / this.healthMax) + '%'
+			return (this.calculationHealthPercent()) + '%'
 		}
+	}
+	calculationHealthPercent() {
+		return this.healthCurrent * 100 / this.healthMax
 	}
 }
 

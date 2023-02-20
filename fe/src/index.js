@@ -19,7 +19,7 @@ const shop = new Sprite({
 })
 
 const player = new Fighter({
-	position: { x: 0, y: 0 },
+	position: { x: 0, y: 100 },
 	velocity: { x: 0, y: 0 },
 	imageSrc: imageCurrent.player.idle.imageSrc,
 	frames: imageCurrent.player.idle.frames,
@@ -31,7 +31,7 @@ const player = new Fighter({
 	damage: statHeros.ninja.damage
 })
 const enemy = new Fighter({
-	position: { x: 400, y: 100 },
+	position: { x: 957, y: 100 },
 	velocity: { x: 0, y: 0 },
 	imageSrc: imageCurrent.enemy.idle.imageSrc,
 	frames: imageCurrent.enemy.idle.frames,
@@ -43,7 +43,7 @@ const enemy = new Fighter({
 	damage: statHeros.hei.damage
 })
 
-let time = 5
+let time = 60
 let timerID = 0
 function determineWinner(player, enemy) {
 	clearTimeout(timerID)
@@ -148,7 +148,6 @@ function animate() {
 		enemy.velocity.y = -10
 	} else {
 		enemy.switchSprite('idle')
-
 	}
 
 	if (enemy.velocity.y < 0) {
@@ -221,19 +220,23 @@ function handleEventKeydown(e) {
 			case 'd':
 				key.d.pressed = true
 				player.lastKey = 'd'
+				socket.emit('keydown-left')
 				break
 			case 'a':
 				key.a.pressed = true
 				player.lastKey = 'a'
+				socket.emit('keydown-right')
 				break
 			case 'w':
 				key.w.pressed = true
+				socket.emit('keydown-up')
 				break
 			case 's':
 				player.bow = true
 				break
 			case ' ':
 				player.attack()
+				socket.emit('attack')
 				break
 			default:
 				break
@@ -270,12 +273,15 @@ function handleEventKeyup(e) {
 	switch (e.key) {
 		case 'd':
 			key.d.pressed = false
+			socket.emit('keyup-left')
 			break
 		case 'a':
 			key.a.pressed = false
+			socket.emit('keyup-right')
 			break
 		case 'w':
 			key.w.pressed = false
+			socket.emit('keyup-up')
 			break
 		case 's':
 			player.bow = false
@@ -308,9 +314,35 @@ function rectangularCollision({ rectangle_1, rectangle_2 }) {
 		rectangle_1.attackBox.position.y <= rectangle_2.position.y + rectangle_2.height && rectangle_1.isAttacking
 	)
 }
-let actors = undefined
-socket.emit('new-user');
-socket.on('user-info', (data) => {
-	actors = data
-	console.log(actors);
+
+socket.on('update-position', (data) => {
+	switch (data) {
+		case 'left-down':
+			key.ArrowLeft.pressed = true
+			enemy.lastKey = 'ArrowLeft'
+			break
+		case 'left-up':
+			key.ArrowLeft.pressed = false
+			break
+		case 'right-down':
+			key.ArrowRight.pressed = true
+			enemy.lastKey = 'ArrowRight'
+			break
+		case 'right-up':
+			key.ArrowRight.pressed = false
+			break
+		case 'up-down':
+			key.ArrowUp.pressed = true
+			enemy.lastKey = 'ArrowUp'
+			break
+		case 'up-up':
+			key.ArrowUp.pressed = false
+			break
+		default:
+			break
+	}
+})
+
+socket.on('attack', () => {
+	enemy.attack()
 })

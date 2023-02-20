@@ -26,17 +26,26 @@ let actors = {}
 io.on('connection', (socket) => {
 	console.log(socket.id);
 	socket.join("room");
-	socket.on('new-user', () => {
-		if (!actors.player) {
-			actors.player = socket.id
-		} else if (!actors.enemy) {
-			actors.enemy = socket.id
-		}
-		console.log(actors);
-		io.emit('user-info', actors);
-	});
-	socket.on('player-action', (player) => {
-		console.log(player);
+	socket.on('keydown-left', () => {
+		socket.broadcast.emit('update-position', 'left-down')
+	})
+	socket.on('keyup-left', () => {
+		socket.broadcast.emit('update-position', 'left-up')
+	})
+	socket.on('keydown-right', () => {
+		socket.broadcast.emit('update-position', 'right-down')
+	})
+	socket.on('keyup-right', () => {
+		socket.broadcast.emit('update-position', 'right-up')
+	})
+	socket.on('keydown-up', () => {
+		socket.broadcast.emit('update-position', 'up-down')
+	})
+	socket.on('keyup-up', () => {
+		socket.broadcast.emit('update-position', 'up-up')
+	})
+	socket.on('attack', () => {
+		socket.broadcast.emit('attack')
 	})
 });
 

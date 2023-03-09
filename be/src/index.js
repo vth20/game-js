@@ -22,27 +22,29 @@ const io = socketIO(server, {
 	allowEIO4: true,
 });
 
-let actors = {}
+let actors = 0
 io.on('connection', (socket) => {
-	console.log(socket.id);
+	actors++;
+	io.to(socket.id).emit('role', actors % 2 === 0 ? 'player' : 'enemy');
 	socket.join("room");
-	socket.on('keydown-left', () => {
-		socket.broadcast.emit('update-position', 'left-down')
+	socket.on('keydown-left', (client_role) => {
+		console.log(client_role);
+		socket.broadcast.emit('update-position', { action: 'left-down', role: client_role })
 	})
-	socket.on('keyup-left', () => {
-		socket.broadcast.emit('update-position', 'left-up')
+	socket.on('keyup-left', (client_role) => {
+		socket.broadcast.emit('update-position', { action: 'left-up', role: client_role })
 	})
-	socket.on('keydown-right', () => {
-		socket.broadcast.emit('update-position', 'right-down')
+	socket.on('keydown-right', (client_role) => {
+		socket.broadcast.emit('update-position', { action: 'right-down', role: client_role })
 	})
-	socket.on('keyup-right', () => {
-		socket.broadcast.emit('update-position', 'right-up')
+	socket.on('keyup-right', (client_role) => {
+		socket.broadcast.emit('update-position', { action: 'left-up', role: client_role })
 	})
-	socket.on('keydown-up', () => {
-		socket.broadcast.emit('update-position', 'up-down')
+	socket.on('keydown-up', (client_role) => {
+		socket.broadcast.emit('update-position', { action: 'up-down', role: client_role })
 	})
-	socket.on('keyup-up', () => {
-		socket.broadcast.emit('update-position', 'up-up')
+	socket.on('keyup-up', (client_role) => {
+		socket.broadcast.emit('update-position', { action: 'up-up', role: client_role })
 	})
 	socket.on('attack', () => {
 		socket.broadcast.emit('attack')

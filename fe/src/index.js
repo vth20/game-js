@@ -30,6 +30,7 @@ const player = new Fighter({
 	health: statHeros.ninja.health,
 	damage: statHeros.ninja.damage
 })
+
 const enemy = new Fighter({
 	position: { x: 957, y: 100 },
 	velocity: { x: 0, y: 0 },
@@ -220,16 +221,16 @@ function handleEventKeydown(e) {
 			case 'd':
 				key.d.pressed = true
 				player.lastKey = 'd'
-				socket.emit('keydown-left')
+				socket.emit('keydown-right', client_role)
 				break
 			case 'a':
 				key.a.pressed = true
 				player.lastKey = 'a'
-				socket.emit('keydown-right')
+				socket.emit('keydown-left', client_role)
 				break
 			case 'w':
 				key.w.pressed = true
-				socket.emit('keydown-up')
+				socket.emit('keydown-up', client_role)
 				break
 			case 's':
 				player.bow = true
@@ -273,15 +274,15 @@ function handleEventKeyup(e) {
 	switch (e.key) {
 		case 'd':
 			key.d.pressed = false
-			socket.emit('keyup-left')
+			socket.emit('keyup-right', client_role)
 			break
 		case 'a':
 			key.a.pressed = false
-			socket.emit('keyup-right')
+			socket.emit('keyup-left', client_role)
 			break
 		case 'w':
 			key.w.pressed = false
-			socket.emit('keyup-up')
+			socket.emit('keyup-up', client_role)
 			break
 		case 's':
 			player.bow = false
@@ -316,33 +317,66 @@ function rectangularCollision({ rectangle_1, rectangle_2 }) {
 }
 
 socket.on('update-position', (data) => {
-	switch (data) {
-		case 'left-down':
-			key.ArrowLeft.pressed = true
-			enemy.lastKey = 'ArrowLeft'
-			break
-		case 'left-up':
-			key.ArrowLeft.pressed = false
-			break
-		case 'right-down':
-			key.ArrowRight.pressed = true
-			enemy.lastKey = 'ArrowRight'
-			break
-		case 'right-up':
-			key.ArrowRight.pressed = false
-			break
-		case 'up-down':
-			key.ArrowUp.pressed = true
-			enemy.lastKey = 'ArrowUp'
-			break
-		case 'up-up':
-			key.ArrowUp.pressed = false
-			break
-		default:
-			break
+	if (data.role === 'player') {
+		switch (data.action) {
+			case 'left-down':
+				key.ArrowLeft.pressed = true
+				player.lastKey = 'ArrowLeft'
+				break
+			case 'left-up':
+				key.ArrowLeft.pressed = false
+				break
+			case 'right-down':
+				key.ArrowRight.pressed = true
+				player.lastKey = 'ArrowRight'
+				break
+			case 'right-up':
+				key.ArrowRight.pressed = false
+				break
+			case 'up-down':
+				key.ArrowUp.pressed = true
+				player.lastKey = 'ArrowUp'
+				break
+			case 'up-up':
+				key.ArrowUp.pressed = false
+				break
+			default:
+				break
+		}
+	} else {
+		switch (data.action) {
+			case 'left-down':
+				key.ArrowLeft.pressed = true
+				enemy.lastKey = 'ArrowLeft'
+				break
+			case 'left-up':
+				key.ArrowLeft.pressed = false
+				break
+			case 'right-down':
+				key.ArrowRight.pressed = true
+				enemy.lastKey = 'ArrowRight'
+				break
+			case 'right-up':
+				key.ArrowRight.pressed = false
+				break
+			case 'up-down':
+				key.ArrowUp.pressed = true
+				enemy.lastKey = 'ArrowUp'
+				break
+			case 'up-up':
+				key.ArrowUp.pressed = false
+				break
+			default:
+				break
+		}
 	}
 })
 
 socket.on('attack', () => {
 	enemy.attack()
+})
+let client_role = undefined
+socket.on('role', (role) => {
+	client_role = role
+	console.log(role);
 })

@@ -90,6 +90,8 @@ class Fighter extends Sprite {
 		this.death = false
 		this.damage = damage
 		this.currentDamage = 0
+		// this.online = false
+		this.moving = false
 	}
 	addImageToSprites() {
 		for (const sprite in this.sprites) {

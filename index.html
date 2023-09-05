@@ -15,7 +15,7 @@
   </head>
   <body>
     <div style="position: relative">
-      <div id="container">
+      <!-- <div id="container">
         <div class="health">
           <div id="player_health" class="health_column"></div>
         </div>
@@ -28,8 +28,21 @@
       </div>
       <div id="result">
         <span id="text_result"></span>
+      </div> -->
+      <div id="select-container">
+        <span class='start-btn'>OFFLINE</span>
+        <span class='start-btn'>ONLINE</span>
+        <div id="setting">
+          <span class='config-button'>A</span>
+          <span class='config-button'>B</span>
+        </div>
+
+        <!-- screen after chose the ONLINE button -->
+        <!-- <span class='start-btn' title="Start with random match">RANDOM</span>
+        <input id="input-room" type="text" placeholder="Enter room...">
+        <span class='start-btn' title="Start with the room">START</span> -->
       </div>
-      <canvas id="canvas"> </canvas>
+      <canvas id="canvas"></canvas>
     </div>
     <!-- <script type="module" src="./src/index.js"></script> -->
     <script type="module" src="./src/app.js"></script>

@@ -35,16 +35,16 @@ const app = {
 			frames: images.shop.frames
 		})
 	},
-	determineWinner: function () {
+	determineWinner: function (player, enemy) {
 		clearTimeout(this.timerID)
 		resultBanner.style.display = 'block'
-		if (this.player.health === this.enemy.health) {
+		if (player.health === enemy.health) {
 			resultBanner.innerHTML = 'Tie'
 		}
-		if (this.player.health > this.enemy.health) {
+		if (player.health > enemy.health) {
 			resultBanner.innerHTML = 'Player 1 win'
 		}
-		if (this.player.health < this.enemy.health) {
+		if (player.health < enemy.health) {
 			resultBanner.innerHTML = 'Player 2 win'
 		}
 	},
@@ -57,7 +57,7 @@ const app = {
 			counter.innerHTML = this.time + 's'
 		}
 		if (this.time === 0) {
-			this.determineWinner()
+			this.determineWinner(this.player, this.enemy)
 		}
 	},
 	/**
@@ -174,7 +174,7 @@ const app = {
 		socket.on('decreaseTime', (time) => {
 			counter.innerHTML = time + 's'
 			if (time === 0) {
-				determineWinner()
+				determineWinner(this.player, this.enemy)
 			}
 		})
 		// draw first player when have connect
@@ -225,6 +225,38 @@ const app = {
 			// handle send notification to broadcast
 			console.log(data.id, ' has left the game');
 		})
+	},
+	offline: function() {
+		this.player = new Fighter({
+			position: { x: 0, y: 0 },
+			velocity: { x: 0, y: 0 },
+			imageSrc: imageCurrent.player.idle.imageSrc,
+			frames: imageCurrent.player.idle.frames,
+			scale: 2.5,
+			offset: { x: 215, y: 155 },
+			sprites: imageCurrent.player,
+			attackBox: attackBoxPosition.ninja,
+			health: statHeros.ninja.health,
+			damage: statHeros.ninja.damage
+		})
+		this.enemy = new Fighter({
+			position: { x: 400, y: 100 },
+			velocity: { x: 0, y: 0 },
+			imageSrc: imageCurrent.enemy.idle.imageSrc,
+			frames: imageCurrent.enemy.idle.frames,
+			scale: 2.5,
+			offset: { x: 215, y: 169 },
+			sprites: imageCurrent.enemy,
+			attackBox: attackBoxPosition.hei,
+			health: statHeros.hei.health,
+			damage: statHeros.hei.damage
+		})
+		determineWinner(this.player, this.enemy)
+		decreaseTimer()
+
+	},
+	online: function() {
+
 	},
 	start: function () {
 		const socket = io("ws://localhost:8080");

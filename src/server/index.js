@@ -28,7 +28,9 @@ const addClient = socket => {
 		const role = clients[0].role === 'player' ? 'enemy' : 'player'
 		clients.push({ id: socket.id, role });
 	}
+	console.log(clients);
 };
+
 const removeClient = id => {
 	console.log("Client disconnected", id);
 	clients = clients.filter(oSocket => {
@@ -39,6 +41,14 @@ const removeClient = id => {
 const getRole = (socketId) => {
 	const oSocket = clients.filter(oSocket => oSocket.id === socketId)
 	return oSocket[0].role
+}
+
+const rectangularCollision = ({ rectangle_1, rectangle_2 }) => {
+	return (
+		rectangle_1.attackBox.position.x + rectangle_1.attackBox.width >= rectangle_2.position.x &&
+		rectangle_1.attackBox.position.x <= rectangle_2.position.x + rectangle_2.width &&
+		rectangle_1.attackBox.position.y <= rectangle_2.position.y + rectangle_2.height && rectangle_1.isAttacking
+	)
 }
 
 const infoCharacter = {
@@ -84,6 +94,16 @@ io.sockets.on("connection", socket => {
 	socket.on("keyup", (data) => {
 		socket.broadcast.emit("moving", data);
 	});
+
+	socket.on('attacking', (data) => {
+		const obj_1 = data[role];
+		const obj_2 = role === 'player' ? data.enemy : data.player;
+		const damage = data[role].currentDamage;
+		const attacked = role === 'player' ? 'enemy' : 'player';
+		if (rectangularCollision({ rectangle_1: obj_1, rectangle_2: obj_2})) {
+			io.emit('takeDamage', {attacked, damage})
+		}
+	})
 
 	socket.on("disconnect", () => {
 		removeClient(id);

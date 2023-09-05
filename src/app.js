@@ -3,8 +3,6 @@ import { Sprite, Fighter } from './js/classes'
 import { images, imageCurrent, attackBoxPosition, statHeros, resultBanner, playerHealth, enemyHealth, counter, handleEventKeydown, handleEventKeyup, key, rectangularCollision } from './js/utils';
 
 const app = {
-	time: 60,
-	timerID: 0,
 	requestFrames: { first: [], second: [] },
 	createPlayer: function (role, position, offset) {
 		return new Fighter({
@@ -21,12 +19,14 @@ const app = {
 			damage: role === 'player' ? statHeros.ninja.damage : statHeros.ninja.damage
 		})
 	},
+
 	createBackground: function () {
 		return new Sprite({
 			position: { x: 0, y: 0 },
 			imageSrc: images.background.imageSrc
 		})
 	},
+
 	createShop: function () {
 		return new Sprite({
 			position: { x: 590, y: 125 },
@@ -35,31 +35,20 @@ const app = {
 			frames: images.shop.frames
 		})
 	},
-	determineWinner: function () {
-		clearTimeout(this.timerID)
+
+	determineWinner: function (player, enemy) {
 		resultBanner.style.display = 'block'
-		if (this.player.health === this.enemy.health) {
+		if (player.healthCurrent === enemy.healthCurrent) {
 			resultBanner.innerHTML = 'Tie'
 		}
-		if (this.player.health > this.enemy.health) {
+		if (player.healthCurrent > enemy.healthCurrent) {
 			resultBanner.innerHTML = 'Player 1 win'
 		}
-		if (this.player.health < this.enemy.health) {
+		if (player.healthCurrent < enemy.healthCurrent) {
 			resultBanner.innerHTML = 'Player 2 win'
 		}
 	},
-	// let separate to another file util
-	decreaseTimer: function () {
-		clearTimeout(this.timerID)
-		if (this.time > 0) {
-			this.timerID = setInterval(() => { this.decreaseTimer() }, 1000)
-			this.time -= 1
-			counter.innerHTML = this.time + 's'
-		}
-		if (this.time === 0) {
-			this.determineWinner()
-		}
-	},
+
 	/**
 	* background animate
 	*/
@@ -90,16 +79,21 @@ const app = {
 		user.velocity.x = 0
 		// user movement
 		if (key.ArrowRight.pressed && user.lastKey === 'ArrowRight') {
-			user.velocity.x = 3
-			user.switchSprite('run')
+			if (user.role === this.role) {
+				user.velocity.x = 3
+				user.switchSprite('run')
+			}
 		} else if (key.ArrowLeft.pressed && user.lastKey === 'ArrowLeft') {
-			user.velocity.x = -3
-			user.switchSprite('run')
+			if (user.role === this.role) {
+				user.velocity.x = -3
+				user.switchSprite('run')
+			}
 		} else if (key.ArrowUp.pressed && user.position.y >= 180) {
-			user.velocity.y = -10
+			if(user.role === this.role) {
+				user.velocity.y = -10
+			}
 		} else if (user.moving) {
 			// ONLINE - ANIMATE
-			debugger
 			switch (user.lastKey) {
 				case 'ArrowRight':
 					user.velocity.x = 3
@@ -167,14 +161,13 @@ const app = {
 	handleSocket: function (socket) {
 		// save role
 		socket.on('getRole', (role) => {
-			console.log(role);
 			this.role = role
 		})
 		// start count time game if 2 player
 		socket.on('decreaseTime', (time) => {
 			counter.innerHTML = time + 's'
 			if (time === 0) {
-				determineWinner()
+				this.determineWinner(this.player, this.enemy)
 			}
 		})
 		// draw first player when have connect
@@ -184,6 +177,7 @@ const app = {
 				this.userAnimate(this[role])
 			}
 		})
+		// draw second player when have connect
 		socket.on('drawSecondPlayer', ({ role, position, offset }) => {
 			if (!this[role]) {
 				this[role] = this.createPlayer(role, position, offset)
@@ -195,27 +189,38 @@ const app = {
 			const self = this[this.role]
 			socket.emit('keydown', { id: socket.id, key: e.key, self, role: this.role, event: 'keydown' })
 			handleEventKeydown(e, self)
+			if (e.key === ' ' && !this[this.role].death) {
+				socket.emit('attacking', {role: this.role, player: this.player, enemy: this.enemy})
+			}
 		})
 
 		window.addEventListener('keyup', (e) => {
 			const self = this[this.role]
 			socket.emit('keyup', { id: socket.id, key: e.key, self, role: this.role, event: 'keyup' })
-			handleEventKeyup(e, self)
+			handleEventKeyup(e, { player: this.player, enemy: this.enemy })
+		})
+
+		socket.on('takeDamage', (data) => {
+			this[data.attacked].takeHit(data.damage)
+			if (data.attacked === 'player') {
+				playerHealth.style.width = this[data.attacked].calculationHealth()
+			} else {
+				enemyHealth.style.width = this[data.attacked].calculationHealth()
+			}
+			if(this[data.attacked].healthCurrent <= 0) {
+				this.determineWinner(this.player, this.enemy)
+			}
 		})
 
 		socket.on("moving", function (data) {
-			console.log(data);
 			switch (data.event) {
 				case 'keydown':
-					console.log(data.role, 'moving');
 					this[data.role].moving = true
 					this[data.role].lastKey = data.key
 					this[data.role].position = { ...data.self.position }
 					this[data.role].offset = { ...data.self.offset }
-					// this.userAction(this[data.role])
 					break
 				case 'keyup':
-					console.log(data.role, 'stop');
 					this[data.role].moving = false
 					break
 			}

@@ -2,7 +2,8 @@ import { c } from '../utils'
 const gravity = 0.7
 
 class Sprite {
-	constructor({ position, imageSrc, scale = 1, frames = 1, offset = { x: 0, y: 0 } }) {
+	constructor({ role, position, imageSrc, scale = 1, frames = 1, offset = { x: 0, y: 0 } }) {
+		this.role = role
 		this.position = position
 		this.width = 50
 		this.height = 150
@@ -47,6 +48,7 @@ class Sprite {
 
 class Fighter extends Sprite {
 	constructor({
+		role,
 		position,
 		velocity,
 		offset = { x: 0, y: 0 },
@@ -58,6 +60,7 @@ class Fighter extends Sprite {
 		damage
 	}) {
 		super({
+			role,
 			position,
 			imageSrc,
 			scale,
@@ -111,7 +114,7 @@ class Fighter extends Sprite {
 		if (!this.death) {
 			this.animateFrames()
 		}
-		this.randomDamage()
+
 		// this.handleBow()
 		this.position.x += this.velocity.x
 		this.position.y += this.velocity.y
@@ -129,6 +132,7 @@ class Fighter extends Sprite {
 		}
 	}
 	attack() {
+		this.randomDamage()
 		this.switchSprite('attack_1')
 		this.isAttacking = true
 		setTimeout(() => {
@@ -213,11 +217,11 @@ class Fighter extends Sprite {
 		// this.image.
 	}
 	takeHit(damage) {
-		console.log(damage);
 		if (this.healthCurrent <= 0) {
 			this.healthCurrent = 0
 			this.switchSprite('death')
 		} else {
+			console.log(this.role, damage);
 			this.healthCurrent -= damage
 			this.switchSprite('takeHit')
 		}

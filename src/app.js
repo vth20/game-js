@@ -5,7 +5,119 @@ import { images, imageCurrent, attackBoxPosition, statHeros, resultBanner, playe
 const app = {
 	time: 60,
 	timerID: 0,
-	requestFrames: { first: [], second: [] },
+	control: {
+		'a': {
+			pressed: false
+		},
+		'd': {
+			pressed: false
+		},
+		'w': {
+			pressed: false
+		},
+		's': {
+			pressed: false
+		},
+		'ArrowRight': {
+			pressed: false
+		},
+		'ArrowLeft': {
+			pressed: false
+		},
+		'ArrowUp': {
+			pressed: false
+		},
+		'ArrowDown': {
+			pressed: false
+		},
+	},
+	handleEventKeydownOffline: function (e) {
+		// control player
+		// control player
+		if (!this.player.death) {
+			switch (e.key) {
+				case 'd':
+					this.control.d.pressed = true
+					this.player.lastKey = 'd'
+					break
+				case 'a':
+					this.control.a.pressed = true
+					this.player.lastKey = 'a'
+					break
+				case 'w':
+					this.control.w.pressed = true
+					break
+				case 's':
+					this.player.bow = true
+					break
+				case ' ':
+					this.player.attack()
+					break
+				default:
+					break
+			}
+		}
+
+		// control enemy
+		if (!this.enemy.death) {
+			// control enemy
+			switch (e.key) {
+				case 'ArrowRight':
+					this.control.ArrowRight.pressed = true
+					this.enemy.lastKey = 'ArrowRight'
+					break
+				case 'ArrowLeft':
+					this.control.ArrowLeft.pressed = true
+					this.enemy.lastKey = 'ArrowLeft'
+					break
+				case 'ArrowUp':
+					this.control.ArrowUp.pressed = true
+					break
+				case 'ArrowDown':
+					this.enemy.bow = false
+					break
+				case '0':
+					this.enemy.attack()
+					break
+				default:
+					break
+			}
+		}
+	},
+	handleEventKeyupOffline: function (e) {
+		switch (e.key) {
+			case 'd':
+				this.control.d.pressed = false
+				break
+			case 'a':
+				this.control.a.pressed = false
+				break
+			case 'w':
+				this.control.w.pressed = false
+				break
+			case 's':
+				this.player.bow = false
+				break
+			default:
+				break
+		}
+		switch (e.key) {
+			case 'ArrowRight':
+				this.control.ArrowRight.pressed = false
+				break
+			case 'ArrowLeft':
+				this.control.ArrowLeft.pressed = false
+				break
+			case 'ArrowUp':
+				this.control.ArrowUp.pressed = false
+				break
+			case 'ArrowDown':
+				this.enemy.bow = false
+				break
+			default:
+				break
+		}
+	},
 	createPlayer: function (role, position, offset) {
 		return new Fighter({
 			role: role,
@@ -38,13 +150,13 @@ const app = {
 	determineWinner: function (player, enemy) {
 		clearTimeout(this.timerID)
 		resultBanner.style.display = 'block'
-		if (player.health === enemy.health) {
+		if (player.healthCurrent === enemy.healthCurrent) {
 			resultBanner.innerHTML = 'Tie'
 		}
-		if (player.health > enemy.health) {
+		if (player.healthCurrent > enemy.healthCurrent) {
 			resultBanner.innerHTML = 'Player 1 win'
 		}
-		if (player.health < enemy.health) {
+		if (player.healthCurrent < enemy.healthCurrent) {
 			resultBanner.innerHTML = 'Player 2 win'
 		}
 	},
@@ -73,6 +185,34 @@ const app = {
 		}
 		this.background.update()
 		this.shop.update()
+	},
+	/**
+	 * switch flip images character
+	 */
+	handleFlipCharacter: function () {
+		if (this.player.position.x > this.enemy.position.x && !this.player.flip) {
+			this.player.flip = true
+			this.enemy.flip = false
+			if (!this.player.death) {
+				this.player.SetImageSprites(images.ninja_flip)
+				this.player.setAttackBox(attackBoxPosition.ninja_flip.offset)
+			}
+			if (!this.enemy.death) {
+				this.enemy.SetImageSprites(images.hei)
+				this.enemy.setAttackBox(attackBoxPosition.hei.offset)
+			}
+		} else if (this.player.position.x < this.enemy.position.x && !this.enemy.flip) {
+			this.player.flip = false
+			this.enemy.flip = true
+			if (!this.player.death) {
+				this.player.SetImageSprites(images.ninja)
+				this.player.setAttackBox(attackBoxPosition.ninja.offset)
+			}
+			if (!this.enemy.death) {
+				this.enemy.SetImageSprites(images.hei_flip)
+				this.enemy.setAttackBox(attackBoxPosition.hei_flip.offset)
+			}
+		}
 	},
 
 	/**
@@ -136,29 +276,7 @@ const app = {
 
 		if (this.player && this.enemy) {
 			// switch flip images
-			if (this.player.position.x > this.enemy.position.x && !this.player.flip) {
-				this.player.flip = true
-				this.enemy.flip = false
-				if (!this.player.death) {
-					this.player.SetImageSprites(images.ninja_flip)
-					this.player.setAttackBox(attackBoxPosition.ninja_flip.offset)
-				}
-				if (!this.enemy.death) {
-					this.enemy.SetImageSprites(images.hei)
-					this.enemy.setAttackBox(attackBoxPosition.hei.offset)
-				}
-			} else if (this.player.position.x < this.enemy.position.x && !this.enemy.flip) {
-				this.player.flip = false
-				this.enemy.flip = true
-				if (!this.player.death) {
-					this.player.SetImageSprites(images.ninja)
-					this.player.setAttackBox(attackBoxPosition.ninja.offset)
-				}
-				if (!this.enemy.death) {
-					this.enemy.SetImageSprites(images.hei_flip)
-					this.enemy.setAttackBox(attackBoxPosition.hei_flip.offset)
-				}
-			}
+			this.handleFlipCharacter()
 		}
 	},
 	/**
@@ -226,7 +344,82 @@ const app = {
 			console.log(data.id, ' has left the game');
 		})
 	},
-	offline: function() {
+	offlineAnimate: function () {
+		window.requestAnimationFrame(this.offlineAnimate.bind(this))
+		this.player.update()
+		this.enemy.update()
+		this.player.velocity.x = 0
+		this.enemy.velocity.x = 0
+
+		// player movement
+		if (this.control.d.pressed && this.player.lastKey === 'd') {
+			this.player.velocity.x = 3
+			this.player.switchSprite('run')
+		} else if (this.control.a.pressed && this.player.lastKey === 'a') {
+			this.player.velocity.x = -3
+			this.player.switchSprite('run')
+		} else if (this.control.w.pressed && this.player.position.y >= 180) {
+			this.player.velocity.y = -10
+		} else {
+			this.player.switchSprite('idle')
+		}
+
+		if (this.player.velocity.y < 0) {
+			this.player.switchSprite('jump')
+		} else if (this.player.velocity.y > 0) {
+			this.player.switchSprite('fall')
+		}
+
+		// enemy movement
+		if (this.control.ArrowRight.pressed && this.enemy.lastKey === 'ArrowRight') {
+			this.enemy.velocity.x = 3
+			this.enemy.switchSprite('run')
+
+		} else if (this.control.ArrowLeft.pressed && this.enemy.lastKey === 'ArrowLeft') {
+			this.enemy.velocity.x = -3
+			this.enemy.switchSprite('run')
+
+		} else if (this.control.ArrowUp.pressed && this.enemy.position.y >= 180) {
+			this.enemy.velocity.y = -10
+		} else {
+			this.enemy.switchSprite('idle')
+
+		}
+
+		if (this.enemy.velocity.y < 0) {
+			this.enemy.switchSprite('jump')
+		} else if (this.enemy.velocity.y > 0) {
+			this.enemy.switchSprite('fall')
+		}
+
+		// detect for collision
+		if (rectangularCollision({ rectangle_1: this.player, rectangle_2: this.enemy }) && this.player.isAttacking && this.player.frameIndexCurrent === 4) {
+			this.player.isAttacking = false
+			this.enemy.takeHit(this.player.currentDamage)
+			enemyHealth.style.width = this.enemy.calculationHealth()
+		}
+		if (this.player.isAttacking && this.player.frameIndexCurrent === 4) {
+			this.player.isAttacking = false
+		}
+
+		if (rectangularCollision({ rectangle_1: this.enemy, rectangle_2: this.player }) && this.enemy.isAttacking && this.enemy.frameIndexCurrent === 2) {
+			this.enemy.isAttacking = false
+			this.player.takeHit(this.enemy.currentDamage)
+			playerHealth.style.width = this.player.calculationHealth()
+		}
+
+		if (this.enemy.isAttacking && this.enemy.frameIndexCurrent === 4) {
+			this.enemy.isAttacking = false
+		}
+
+		// end game base on health
+		if (this.enemy.healthCurrent <= 0 || this.player.healthCurrent <= 0) {
+			this.determineWinner(this.player, this.enemy)
+		}
+
+		this.handleFlipCharacter()
+	},
+	offline: function () {
 		this.player = new Fighter({
 			position: { x: 0, y: 0 },
 			velocity: { x: 0, y: 0 },
@@ -251,11 +444,13 @@ const app = {
 			health: statHeros.hei.health,
 			damage: statHeros.hei.damage
 		})
-		determineWinner(this.player, this.enemy)
-		decreaseTimer()
-
+		window.addEventListener('keydown', this.handleEventKeydownOffline.bind(this))
+		window.addEventListener('keyup', this.handleEventKeyupOffline.bind(this))
+		this.backgroundAnimate()
+		this.decreaseTimer()
+		this.offlineAnimate()
 	},
-	online: function() {
+	online: function () {
 
 	},
 	start: function () {
@@ -265,4 +460,4 @@ const app = {
 	}
 }
 
-app.start()
+app.offline()

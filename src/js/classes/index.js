@@ -213,8 +213,7 @@ class Fighter extends Sprite {
 		// this.image.
 	}
 	takeHit(damage) {
-		console.log(damage);
-		if (this.healthCurrent <= 0) {
+		if(this.healthCurrent - damage <= 0) {
 			this.healthCurrent = 0
 			this.switchSprite('death')
 		} else {

@@ -13,3 +13,9 @@ Use key :arrow_left: :arrow_up: :arrow_down: :arrow_right: and space to control 
 ![image](https://github.com/vth20/game.js/assets/78136149/0ed8763d-4506-4c56-8e91-69ea91414548)
 
 ![image](https://github.com/vth20/game.js/assets/78136149/57c8bd0c-7b0a-40bc-8e69-5b231e59ffc5)
+
+Demo:
+![image](https://github.com/vth20/game.js/assets/78136149/d7aba70c-1d80-4cfe-bda0-ab4d4db3d459)
+![image](https://github.com/vth20/game.js/assets/78136149/15f7d0c7-88c4-4560-9998-3191fefcbc6e)
+![image](https://github.com/vth20/game.js/assets/78136149/ac666450-7ff0-4540-b0c7-8ad3a6c06b75)
+![image](https://github.com/vth20/game.js/assets/78136149/8568c587-ab45-4462-8635-c4d2dcbf7bab)

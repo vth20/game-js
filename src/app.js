@@ -162,12 +162,14 @@ const app = {
 	},
 	// let separate to another file util
 	decreaseTimer: function () {
-		const counter = $("#counter")
+		if(!this.counter) {
+			this.counter = $("#counter")
+		}
 		clearTimeout(this.timerID)
 		if (this.time > 0) {
 			this.timerID = setInterval(() => { this.decreaseTimer() }, 1000)
 			this.time -= 1
-			counter.innerHTML = this.time + 's'
+			this.counter.innerHTML = this.time + 's'
 		}
 		if (this.time === 0) {
 			this.determineWinner(this.player, this.enemy)
@@ -294,8 +296,10 @@ const app = {
 		})
 		// start count time game if 2 player
 		socket.on('decreaseTime', (time) => {
-			const counter = $("#counter")
-			counter.innerHTML = time + 's'
+			if (!this.counter) {
+				this.counter = $("#counter")
+			}
+			this.counter.innerHTML = time + 's'
 			if (time === 0) {
 				determineWinner(this.player, this.enemy)
 			}
@@ -459,7 +463,6 @@ const app = {
 	online: function () {
 		const socket = io("ws://localhost:8080");
 		this.handleSocket(socket)
-		this.decreaseTimer()
 	},
 	start: function () {
 		this.backgroundAnimate()

@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { Sprite, Fighter } from './js/classes'
-import { images, imageCurrent, attackBoxPosition, statHeros, resultBanner, playerHealth, enemyHealth, counter, handleEventKeydown, handleEventKeyup, key, rectangularCollision } from './js/utils';
+import { images, imageCurrent, attackBoxPosition, statHeros, $, handleEventKeydown, handleEventKeyup, key, rectangularCollision, changeScreen } from './js/utils';
 
 const app = {
 	time: 60,
@@ -32,7 +32,6 @@ const app = {
 		},
 	},
 	handleEventKeydownOffline: function (e) {
-		// control player
 		// control player
 		if (!this.player.death) {
 			switch (e.key) {
@@ -149,6 +148,7 @@ const app = {
 	},
 	determineWinner: function (player, enemy) {
 		clearTimeout(this.timerID)
+		const resultBanner = $("#text_result")
 		resultBanner.style.display = 'block'
 		if (player.healthCurrent === enemy.healthCurrent) {
 			resultBanner.innerHTML = 'Tie'
@@ -162,6 +162,7 @@ const app = {
 	},
 	// let separate to another file util
 	decreaseTimer: function () {
+		const counter = $("#counter")
 		clearTimeout(this.timerID)
 		if (this.time > 0) {
 			this.timerID = setInterval(() => { this.decreaseTimer() }, 1000)
@@ -239,21 +240,24 @@ const app = {
 			user.velocity.y = -10
 		} else if (user.moving) {
 			// ONLINE - ANIMATE
-			debugger
+
 			switch (user.lastKey) {
 				case 'ArrowRight':
 					user.velocity.x = 3
 					user.switchSprite('run')
+
 					break;
 				case 'ArrowLeft':
 					user.velocity.x = -3
 					user.switchSprite('run')
+
 					break;
 				case 'ArrowUp':
 					if (user.position.y >= 180) {
 						user.velocity.y = -10
 					}
 					user.switchSprite('jump')
+
 					break;
 				case '':
 					user.switchSprite('idle')
@@ -290,6 +294,7 @@ const app = {
 		})
 		// start count time game if 2 player
 		socket.on('decreaseTime', (time) => {
+			const counter = $("#counter")
 			counter.innerHTML = time + 's'
 			if (time === 0) {
 				determineWinner(this.player, this.enemy)
@@ -394,6 +399,7 @@ const app = {
 
 		// detect for collision
 		if (rectangularCollision({ rectangle_1: this.player, rectangle_2: this.enemy }) && this.player.isAttacking && this.player.frameIndexCurrent === 4) {
+			const enemyHealth = $("#enemy_health")
 			this.player.isAttacking = false
 			this.enemy.takeHit(this.player.currentDamage)
 			enemyHealth.style.width = this.enemy.calculationHealth()
@@ -403,6 +409,7 @@ const app = {
 		}
 
 		if (rectangularCollision({ rectangle_1: this.enemy, rectangle_2: this.player }) && this.enemy.isAttacking && this.enemy.frameIndexCurrent === 2) {
+			const playerHealth = $("#player_health")
 			this.enemy.isAttacking = false
 			this.player.takeHit(this.enemy.currentDamage)
 			playerHealth.style.width = this.player.calculationHealth()
@@ -446,18 +453,19 @@ const app = {
 		})
 		window.addEventListener('keydown', this.handleEventKeydownOffline.bind(this))
 		window.addEventListener('keyup', this.handleEventKeyupOffline.bind(this))
-		this.backgroundAnimate()
-		this.decreaseTimer()
 		this.offlineAnimate()
+		this.decreaseTimer()
 	},
 	online: function () {
-
+		const socket = io("ws://localhost:8080");
+		this.handleSocket(socket)
+		this.decreaseTimer()
 	},
 	start: function () {
-		const socket = io("ws://localhost:8080");
 		this.backgroundAnimate()
-		this.handleSocket(socket)
+		changeScreen('select')
 	}
 }
+app.start()
 
-app.offline()
+export { app }

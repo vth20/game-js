@@ -1,6 +1,11 @@
 * {
   box-sizing: border-box;
   font-family: "Press Start 2P", cursive;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
 }
 
 body {
@@ -133,7 +138,8 @@ body {
   cursor: pointer;
   padding-left: 5px;
 }
-.config-button:active, .start-btn:active {
+.config-button:active,
+.start-btn:active {
   box-shadow: none;
   position: relative;
   top: 0.2em;
@@ -156,5 +162,11 @@ body {
   -o-border-radius: 7px;
   border-radius: 7px;
   box-shadow: 0 0.2em gray;
-  outline: none;
+  outline: auto;
+}
+
+#exit-btn {
+  position: absolute;
+  top: 14px;
+  right: 1111px;
 }
